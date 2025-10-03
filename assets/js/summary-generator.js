@@ -25,40 +25,9 @@ jQuery(document).ready(function($) {
             nonce: wis_ajax.nonce
         }).done(function(data) {
             spinner.removeClass('is-active');
-            if (Object.keys(data).length === 0 || Object.keys(data).length === 1 && data.hasOwnProperty('all') && data.all.total === 0) {
-                resultsContainer.html('<p>No matching orders found.</p>');
-                return;
+            if ( data.html ) {
+                resultsContainer.html(data.html);
             }
-
-            let table = '<table class="widefat fixed" cellspacing="0"><thead><tr>' +
-                '<th>Payment Method</th>' +
-                '<th>Number of Orders</th>' +
-                '<th style="text-align:right">Total VAT</th>' +
-                '<th style="text-align:right">Total Amount</th>' +
-                '</tr></thead><tbody>';
-
-            let totalSum = data.all.total;
-            let totalTaxSum = data.all.total_tax;
-            delete data.all;
-
-            for (const method in data) {
-                if (data.hasOwnProperty(method)) {
-                    table += '<tr>' +
-                        '<td>' + method + '</td>' +
-                        '<td>' + data[method].count + '</td>' +
-                        '<td style="text-align:right">' + data[method].total_tax.toFixed(2) + '</td>' +
-                        '<td style="text-align:right">' + data[method].total.toFixed(2) + '</td>' +
-                        '</tr>';
-                }
-            }
-            
-            table += '</tbody><tfoot><tr>' +
-                '<th colspan="2" style="text-align:right"><strong>Total:</strong></th>' +
-                '<th style="text-align:right"><strong>' + totalTaxSum.toFixed(2) + '</strong></th>' +
-                '<th style="text-align:right"><strong>' + totalSum.toFixed(2) + '</strong></th>' +
-                '</tr></tfoot></table>';
-
-            resultsContainer.html(table);
         }).fail(function(jqXHR) {
             spinner.removeClass('is-active');
             let errorMsg = 'An error occurred.';

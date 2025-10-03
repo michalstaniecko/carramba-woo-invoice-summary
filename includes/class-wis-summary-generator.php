@@ -100,4 +100,10 @@ class WIS_Summary_Generator {
 
         return $summary;
     }
+
+    public function get_summary_html( $summary ) {
+        ob_start();
+        include WIS_PLUGIN_PATH . 'templates/summary-results-table.php';
+        return ob_get_clean();
+    }
 }

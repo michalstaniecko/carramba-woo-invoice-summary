@@ -32,8 +32,9 @@ class WIS_Rest_Api {
         }
 
         $generator = new WIS_Summary_Generator();
-        $summary = $generator->generate_summary( (int) $year, (int) $month, (array) $document_types );
+        $summary_data = $generator->generate_summary( (int) $year, (int) $month, (array) $document_types );
+        $html = $generator->get_summary_html( $summary_data );
 
-        return new WP_REST_Response( $summary, 200 );
+        return new WP_REST_Response( array( 'html' => $html ), 200 );
     }
 }
