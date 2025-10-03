@@ -9,13 +9,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-if ( empty( $summary ) || ( count( $summary ) === 1 && isset( $summary['all'] ) && $summary['all']['total'] == 0 ) ) {
-    echo '<p>' . __( 'No matching orders found.', 'woocommerce-invoice-summary' ) . '</p>';
+if ( empty( $summary ) || ( count( $summary ) === 1 && isset( $summary['all'] ) && $summary['all']['count'] == 0 ) ) {
+    echo '<p>' . __( 'No matching documents found for the selected period.', 'woocommerce-invoice-summary' ) . '</p>';
     return;
 }
 
-$total_sum = $summary['all']['total'];
-$total_tax_sum = $summary['all']['total_tax'];
+$totals = $summary['all'];
 unset( $summary['all'] );
 
 ?>
@@ -23,26 +22,28 @@ unset( $summary['all'] );
     <thead>
         <tr>
             <th><?php _e( 'Payment Method', 'woocommerce-invoice-summary' ); ?></th>
-            <th><?php _e( 'Number of Orders', 'woocommerce-invoice-summary' ); ?></th>
+            <th style="text-align:center"><?php _e( 'Number of Orders', 'woocommerce-invoice-summary' ); ?></th>
             <th style="text-align:right"><?php _e( 'Total VAT', 'woocommerce-invoice-summary' ); ?></th>
             <th style="text-align:right"><?php _e( 'Total Amount', 'woocommerce-invoice-summary' ); ?></th>
         </tr>
     </thead>
     <tbody>
         <?php foreach ( $summary as $method => $data ) : ?>
+            <?php if ($data['count'] == 0 && $data['total'] == 0) continue; ?>
             <tr>
                 <td><?php echo esc_html( $method ); ?></td>
-                <td><?php echo esc_html( $data['count'] ); ?></td>
-                <td style="text-align:right"><?php echo esc_html( number_format( $data['total_tax'], 2 ) ); ?></td>
-                <td style="text-align:right"><?php echo esc_html( number_format( $data['total'], 2 ) ); ?></td>
+                <td style="text-align:center"><?php echo esc_html( $data['count'] ); ?></td>
+                <td style="text-align:right"><?php echo wp_kses_post( wc_price( $data['total_tax'] ) ); ?></td>
+                <td style="text-align:right"><?php echo wp_kses_post( wc_price( $data['total'] ) ); ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
     <tfoot>
         <tr>
-            <th colspan="2" style="text-align:right"><strong><?php _e( 'Total:', 'woocommerce-invoice-summary' ); ?></strong></th>
-            <th style="text-align:right"><strong><?php echo esc_html( number_format( $total_tax_sum, 2 ) ); ?></strong></th>
-            <th style="text-align:right"><strong><?php echo esc_html( number_format( $total_sum, 2 ) ); ?></strong></th>
+            <th colspan="1" style="text-align:right"><strong><?php _e( 'Total:', 'woocommerce-invoice-summary' ); ?></strong></th>
+            <th style="text-align:center"><strong><?php echo esc_html( $totals['count'] ); ?></strong></th>
+            <th style="text-align:right"><strong><?php echo wp_kses_post( wc_price( $totals['total_tax'] ) ); ?></strong></th>
+            <th style="text-align:right"><strong><?php echo wp_kses_post( wc_price( $totals['total'] ) ); ?></strong></th>
         </tr>
     </tfoot>
 </table>

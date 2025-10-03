@@ -31,7 +31,7 @@ class WIS_Admin_Menu {
             'wis-summary-generator',
             WIS_PLUGIN_URL . 'assets/js/summary-generator.js',
             array( 'jquery', 'wp-api-request' ), // Add wp-api-request dependency
-            '1.2.0',
+            '1.4.1',
             true
         );
 
