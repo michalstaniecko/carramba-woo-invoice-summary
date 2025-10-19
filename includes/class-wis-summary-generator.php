@@ -8,7 +8,8 @@ class WIS_Summary_Generator {
 
     public function generate_summary( $year, $month, $document_types ) {
         $orders = $this->get_orders_for_period( $year, $month, $document_types );
-        return $this->group_by_payment_method( $orders );
+        $refunds = $this->get_refunds_for_period( $year, $month, $document_types );
+        return $this->group_by_payment_method( array_merge( $orders, $refunds ) );
     }
 
     private function get_orders_for_period( $year, $month, $document_types ) {
@@ -50,6 +51,40 @@ class WIS_Summary_Generator {
         return wc_get_orders( $args );
     }
 
+    private function get_refunds_for_period( $year, $month, $document_types ) {
+        // Only process if refund document types are requested
+        if ( ! in_array( 'refund-invoice', $document_types ) && ! in_array( 'refund-receipt', $document_types ) ) {
+            return [];
+        }
+
+        $start_date = strtotime( "{$year}-{$month}-01 00:00:00" );
+        $days_in_month = date('t', $start_date);
+        $end_date = strtotime( "{$year}-{$month}-{$days_in_month} 23:59:59" );
+
+        // Get all refunds for the period
+        $args = [
+            'type'   => 'shop_order_refund',
+            'limit'  => -1,
+            'date_created' => $start_date . '...' . $end_date,
+        ];
+
+        $all_refunds = wc_get_orders( $args );
+        $filtered_refunds = [];
+
+        foreach ( $all_refunds as $refund ) {
+            // Check if refund has _billing_vat meta (receipt refund) or not (invoice refund)
+            $has_billing_vat = get_post_meta( $refund->get_id(), '_billing_vat', true ) !== '';
+            
+            if ( $has_billing_vat && in_array( 'refund-receipt', $document_types ) ) {
+                $filtered_refunds[] = $refund;
+            } elseif ( ! $has_billing_vat && in_array( 'refund-invoice', $document_types ) ) {
+                $filtered_refunds[] = $refund;
+            }
+        }
+
+        return $filtered_refunds;
+    }
+
     private function group_by_payment_method( $orders ) {
         $summary = [];
         $grand_total = 0;
@@ -57,7 +92,14 @@ class WIS_Summary_Generator {
         $grand_total_count = 0;
 
         foreach ( $orders as $order ) {
-            $payment_method_title = $order->get_payment_method_title();
+            // Get payment method - for refunds, get it from parent order
+            if ( $order->get_type() === 'shop_order_refund' ) {
+                $parent_order = wc_get_order( $order->get_parent_id() );
+                $payment_method_title = $parent_order ? $parent_order->get_payment_method_title() : __( 'Unknown', 'woocommerce-invoice-summary' );
+            } else {
+                $payment_method_title = $order->get_payment_method_title();
+            }
+            
             if ( ! isset( $summary[ $payment_method_title ] ) ) {
                 $summary[ $payment_method_title ] = ['count' => 0, 'total' => 0, 'total_tax' => 0];
             }
