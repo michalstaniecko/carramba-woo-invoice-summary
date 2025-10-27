@@ -34,10 +34,10 @@
                     <th scope="row"><?php _e( 'Document Types', 'woocommerce-invoice-summary' ); ?></th>
                     <td>
                         <fieldset>
-                            <label><input type="checkbox" name="wis-doc-type" value="invoice" checked> <?php _e( 'Invoices', 'woocommerce-invoice-summary' ); ?></label><br>
-                            <label><input type="checkbox" name="wis-doc-type" value="receipt"> <?php _e( 'Receipts', 'woocommerce-invoice-summary' ); ?></label><br>
-                            <label><input type="checkbox" name="wis-doc-type" value="refund-invoice"> <?php _e( 'Refunds (Invoices)', 'woocommerce-invoice-summary' ); ?></label><br>
-                            <label><input type="checkbox" name="wis-doc-type" value="refund-receipt"> <?php _e( 'Refunds (Receipts)', 'woocommerce-invoice-summary' ); ?></label>
+                            <label><input type="radio" name="wis-doc-type" value="invoice" checked> <?php _e( 'Invoices', 'woocommerce-invoice-summary' ); ?></label><br>
+                            <label><input type="radio" name="wis-doc-type" value="receipt"> <?php _e( 'Receipts', 'woocommerce-invoice-summary' ); ?></label><br>
+                            <label><input type="radio" name="wis-doc-type" value="refund-invoice"> <?php _e( 'Refunds (Invoices)', 'woocommerce-invoice-summary' ); ?></label><br>
+                            <label><input type="radio" name="wis-doc-type" value="refund-receipt"> <?php _e( 'Refunds (Receipts)', 'woocommerce-invoice-summary' ); ?></label>
                         </fieldset>
                     </td>
                 </tr>
