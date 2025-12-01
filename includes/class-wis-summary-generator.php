@@ -137,4 +137,78 @@ class WIS_Summary_Generator {
 		include WIS_PLUGIN_PATH . 'templates/summary-results-table.php';
 		return ob_get_clean();
 	}
+
+	public function generate_csv( $summary, $year, $month, $document_types ) {
+		if ( empty( $summary ) || ( count( $summary ) === 1 && isset( $summary['all'] ) && $summary['all']['count'] == 0 ) ) {
+			return '';
+		}
+
+		$totals = $summary['all'];
+		unset( $summary['all'] );
+
+		// Start output buffering
+		ob_start();
+		$output = fopen( 'php://output', 'w' );
+
+		// Add BOM for Excel UTF-8 compatibility
+		fprintf( $output, chr(0xEF).chr(0xBB).chr(0xBF) );
+
+		// Add header with report details
+		fputcsv( $output, array( __( 'Invoice Summary Report', 'woocommerce-invoice-summary' ) ) );
+		fputcsv( $output, array( __( 'Period:', 'woocommerce-invoice-summary' ) . ' ' . date_i18n( 'F Y', mktime( 0, 0, 0, $month, 1, $year ) ) ) );
+		fputcsv( $output, array( __( 'Document Types:', 'woocommerce-invoice-summary' ) . ' ' . implode( ', ', $this->get_document_type_labels( $document_types ) ) ) );
+		fputcsv( $output, array( __( 'Generated:', 'woocommerce-invoice-summary' ) . ' ' . date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ) ) ) );
+		fputcsv( $output, array() ); // Empty row
+
+		// Add column headers
+		fputcsv( $output, array(
+			__( 'Payment Method', 'woocommerce-invoice-summary' ),
+			__( 'Number of Orders', 'woocommerce-invoice-summary' ),
+			__( 'Total VAT', 'woocommerce-invoice-summary' ),
+			__( 'Total Amount', 'woocommerce-invoice-summary' )
+		) );
+
+		// Add data rows
+		foreach ( $summary as $method => $data ) {
+			if ( $data['count'] == 0 && $data['total'] == 0 ) {
+				continue;
+			}
+
+			fputcsv( $output, array(
+				$method,
+				$data['count'],
+				number_format( $data['total_tax'], 2, '.', '' ),
+				number_format( $data['total'], 2, '.', '' )
+			) );
+		}
+
+		// Add totals row
+		fputcsv( $output, array(
+			__( 'Total:', 'woocommerce-invoice-summary' ),
+			$totals['count'],
+			number_format( $totals['total_tax'], 2, '.', '' ),
+			number_format( $totals['total'], 2, '.', '' )
+		) );
+
+		fclose( $output );
+		return ob_get_clean();
+	}
+
+	private function get_document_type_labels( $document_types ) {
+		$labels = array();
+		$type_map = array(
+			'invoice' => __( 'Invoices', 'woocommerce-invoice-summary' ),
+			'receipt' => __( 'Receipts', 'woocommerce-invoice-summary' ),
+			'refund-invoice' => __( 'Refunds (Invoices)', 'woocommerce-invoice-summary' ),
+			'refund-receipt' => __( 'Refunds (Receipts)', 'woocommerce-invoice-summary' )
+		);
+
+		foreach ( $document_types as $type ) {
+			if ( isset( $type_map[ $type ] ) ) {
+				$labels[] = $type_map[ $type ];
+			}
+		}
+
+		return $labels;
+	}
 }

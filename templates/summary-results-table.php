@@ -18,6 +18,12 @@ $totals = $summary['all'];
 unset( $summary['all'] );
 
 ?>
+<div style="margin-bottom: 10px;">
+    <button type="button" id="wis-export-csv" class="button button-secondary">
+        <span class="dashicons dashicons-download" style="margin-top: 3px;"></span>
+        <?php _e( 'Export to CSV', 'woocommerce-invoice-summary' ); ?>
+    </button>
+</div>
 <table class="widefat fixed" cellspacing="0">
     <thead>
         <tr>
