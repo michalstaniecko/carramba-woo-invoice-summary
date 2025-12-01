@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WooCommerce Invoice Summary
  * Description: Generates a monthly summary of invoices grouped by payment method.
- * Version: 1.4.2
+ * Version: 1.5.0
  * Author: iHumbak.website
  * Text Domain: woocommerce-invoice-summary
  */
